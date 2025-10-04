@@ -9,7 +9,24 @@ Before running:
 """
 
 import asyncio
+import json
+import os
 from claude_agent_sdk import query, ClaudeSDKClient, ClaudeAgentOptions
+
+
+def format_message(message):
+    """Format messages as readable JSON"""
+    # Convert message to dict (most SDK messages have a model_dump or dict method)
+    if hasattr(message, 'model_dump'):
+        msg_dict = message.model_dump()
+    elif hasattr(message, 'dict'):
+        msg_dict = message.dict()
+    else:
+        # Fallback: convert to dict via __dict__
+        msg_dict = vars(message)
+
+    # Pretty print the JSON
+    return json.dumps(msg_dict, indent=2, default=str)
 
 
 async def simple_query_demo():
@@ -26,7 +43,7 @@ async def simple_query_demo():
         prompt="What is 2 + 2? Just give me the answer.",
         options=options
     ):
-        print(message)
+        print(format_message(message))
 
 
 async def conversation_demo():
@@ -45,18 +62,25 @@ async def conversation_demo():
         await client.query("What's the capital of France?")
 
         async for response in client.receive_response():
-            print(response)
+            print(format_message(response))
 
         # Follow-up question (uses context from previous exchange)
         print("\n\nQuestion 2: What's the population of that city?")
         await client.query("What's the population of that city?")
 
         async for response in client.receive_response():
-            print(response)
+            print(format_message(response))
 
 
 async def main():
     """Run all demonstrations"""
+    # Check for API key
+    api_key = os.getenv('ANTHROPIC_API_KEY')
+    if api_key:
+        print(f"ANTHROPIC_API_KEY: {api_key}\n")
+    else:
+        print("ANTHROPIC_API_KEY: Not set\n")
+
     # Run simple query demo
     await simple_query_demo()
 
