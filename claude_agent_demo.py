@@ -52,7 +52,7 @@ async def conversation_demo():
 
     options = ClaudeAgentOptions(
         allowed_tools=["Read", "Write"],
-        permission_mode='ask',
+        permission_mode='default',
         system_prompt="You are a helpful assistant"
     )
 
